@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: drone-runner
+  labels:
+    app.kubernetes.io/name: drone-runner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: drone
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: drone
+    spec:
+      serviceAccountName: drone-runner
+      containers:
+      - name: runner
+        image: drone/drone-runner-kube:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: DRONE_NAMESPACE_DEFAULT
+          valueFrom:
+            configMapKeyRef: 
+              name: drone-runner-config
+              key: DRONE_NAMESPACE_DEFAULT
+        - name: DRONE_SERVICE_ACCOUNT_DEFAULT
+          valueFrom:
+            configMapKeyRef: 
+              name: drone-runner-config
+              key: DRONE_SERVICE_ACCOUNT_DEFAULT
+        - name: DRONE_RPC_HOST
+          valueFrom:
+            configMapKeyRef: 
+              name: drone-runner-config
+              key: DRONE_RPC_HOST
+        - name: DRONE_RPC_PROTO
+          valueFrom:
+            configMapKeyRef: 
+              name: drone-runner-config
+              key: DRONE_RPC_PROTO
+        - name: DRONE_RPC_SECRET 
+          valueFrom:
+            secretKeyRef: 
+              name: drone-runner-secret
+              key: DRONE_RPC_SECRET
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: drone-runner
+  labels:
+    app.kubernetes.io/name: drone-runner

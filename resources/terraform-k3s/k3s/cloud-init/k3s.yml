@@ -1,0 +1,57 @@
+#cloud-config
+
+%{if persistent_volume_dev != ""~}
+fs_setup:
+  - label: ${persistent_volume_label}
+    filesystem: ext4
+    device: ${persistent_volume_dev}
+
+mounts:
+%{if persistent_volume_dev == persistent_volume_label~}
+  # clear default mount for ephemeral disk
+  - [${persistent_volume_dev}, null]
+%{endif~}
+  - [LABEL=${persistent_volume_label}, /mnt/persistent]
+%{endif~}
+
+write_files:
+  - path: /root/k3s.env
+    content: ${k3s_config}
+    encoding: b64
+%{if k3s_bootstrap_manifest_b64 != ""~}
+  - path: /root/k3s-bootstrap.yaml
+    content: ${k3s_bootstrap_manifest_b64}
+    encoding: b64
+%{endif~}
+  ${indent(2, custom_cloud_config_write_files)}
+
+runcmd:
+  - mkdir -p /mnt/persistent/var/lib/rancher/k3s/agent /mnt/persistent/etc/rancher /var/lib/containerd
+  # exclude containerd data from persistence
+  - if [ -d /mnt/persistent/var/lib/rancher/k3s/agent/containerd ]; then rm -r /mnt/persistent/var/lib/rancher/k3s/agent/containerd; fi
+  - ln -s /var/lib/containerd /mnt/persistent/var/lib/rancher/k3s/agent/containerd
+  # setup persistence
+  - ln -s /mnt/persistent/var/lib/rancher /var/lib/rancher
+  - ln -s /mnt/persistent/etc/rancher /etc/rancher
+  # install k3s
+  - set -a; . /root/k3s.env; set +a
+%{if length(ips) != 0 && is_server~}
+  - export INSTALL_K3S_EXEC="$INSTALL_K3S_EXEC%{for ip in ips} --node-ip=${ip} --tls-san=${ip}%{endfor}"
+%{endif~}
+%{if length(ips) != 0 && !is_server~}
+  - export INSTALL_K3S_EXEC="$INSTALL_K3S_EXEC%{for ip in ips} --node-ip=${ip}%{endfor}"
+%{endif~}
+%{if external_ip != null~}
+  - export INSTALL_K3S_EXEC="$INSTALL_K3S_EXEC --node-external-ip=${external_ip}"
+%{endif~}
+  - bash -c "for i in {1..6}; do (ping -c 10 -q github.com) && break || (echo 'failed to verify network, will try again soon'); done"
+  - curl -sfL ${k3s_install_url} | sh -
+  # install cni plugins
+  - wget --no-verbose -O /tmp/cni-plugins.tgz https://github.com/containernetworking/plugins/releases/download/${cni_plugins_version}/cni-plugins-linux-amd64-${cni_plugins_version}.tgz
+  - mkdir -p /opt/cni/bin
+  - tar -xzC /opt/cni/bin -f /tmp/cni-plugins.tgz
+%{if k3s_bootstrap_manifest_b64 != ""~}
+  - mkdir -p /var/lib/rancher/k3s/server/manifests/
+  - mv /root/k3s-bootstrap.yaml /var/lib/rancher/k3s/server/manifests/
+%{endif~}
+  ${indent(2, custom_cloud_config_runcmd)}

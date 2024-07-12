@@ -1,0 +1,44 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: production-hosts
+  namespace: production
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - "kub3.dev"
+    secretName: app-letsencrypt-cert
+  - hosts:
+    - "api.kub3.dev"
+    secretName: api-letsencrypt-cert
+  rules:
+  - host: api.kub3.dev
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/wallets"
+        backend:
+          service:
+            name: picpay-server
+            port: 
+              number: 80
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: nginx-server
+            port: 
+              number: 80
+  - host: kub3.dev
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: devops-app-server
+            port: 
+              number: 80
