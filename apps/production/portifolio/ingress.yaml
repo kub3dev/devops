@@ -19,6 +19,6 @@ spec:
         path: "/"
         backend:
           service:
-            name: devops-app-server
+            name: portifolio-service
             port: 
               number: 80
