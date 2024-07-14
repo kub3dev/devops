@@ -10,7 +10,7 @@ spec:
   tls:
   - hosts:
     - "gomes.dev"
-    secretName: app-letsencrypt-cert
+    secretName: protifolio-letsencrypt-crt
   rules:
   - host: gomes.dev
     http:
