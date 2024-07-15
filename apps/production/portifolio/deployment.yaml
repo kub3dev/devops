@@ -15,10 +15,6 @@ spec:
       containers:
       - name: portifolio
         image: harbor.kub3.dev/gomesdev/portifolio:2024.7.14.13.54.32
-        resources:
-          limits:
-            memory: "128Mi"
-            cpu: "500m"
         ports:
         - containerPort: 80
 ---
