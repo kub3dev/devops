@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: confeitaria
+  namespace: production
+spec:
+  selector:
+    matchLabels:
+      app: confeitaria
+  template:
+    metadata:
+      labels:
+        app: confeitaria
+    spec:
+      containers:
+      - name: confeitaria
+        image: harbor.kub3.dev/kub3dev/confeitaria:0.5.1
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: confeitaria-service
+  namespace: production
+spec:
+  selector:
+    app: confeitaria
+  ports:
+  - port: 80
+    targetPort: 3000
