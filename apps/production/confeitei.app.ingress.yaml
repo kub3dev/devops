@@ -22,7 +22,7 @@ spec:
         path: "/"
         backend:
           service:
-            name: nginx-server
+            name: confeitei-api-service
             port: 
               number: 80
   - host: confeitei.app
