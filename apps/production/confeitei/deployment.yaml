@@ -1,31 +1,31 @@
-apiVersion:0.5.15
-kind:0.5.15
-metadata:0.5.15
-  name:0.5.15
-  namespace:0.5.15
-spec:0.5.15
-  selector:0.5.15
-    matchLabels:0.5.15
-      app:0.5.15
-  template:0.5.15
-    metadata:0.5.15
-      labels:0.5.15
-        app:0.5.15
-    spec:0.5.15
-      containers:0.5.15
-      - name:0.5.15
-        image:0.5.15
-        ports:0.5.15
-        - containerPort:0.5.15
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: confeitei-app
+  namespace: production
+spec:
+  selector:
+    matchLabels:
+      app: confeitei-app
+  template:
+    metadata:
+      labels:
+        app: confeitei-app
+    spec:
+      containers:
+      - name: confeitei-app
+        image: harbor.kub3.dev/confeitei/confeitei-app:0.5.12
+        ports:
+        - containerPort: 80
 ---
-apiVersion:0.5.15
-kind:0.5.15
-metadata:0.5.15
-  name:0.5.15
-  namespace:0.5.15
-spec:0.5.15
-  selector:0.5.15
-    app:0.5.15
-  ports:0.5.15
-  - port:0.5.15
-    targetPort:0.5.15
+apiVersion: v1
+kind: Service
+metadata:
+  name: confeitei-app-service
+  namespace: production
+spec:
+  selector:
+    app: confeitei-app
+  ports:
+  - port: 80
+    targetPort: 3000
