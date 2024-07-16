@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: confeitei-app
-        image: harbor.kub3.dev/confeitei/confeitei-app:0.5.11
+        image: harbor.kub3.dev/confeitei/confeitei-app:0.5.12
         ports:
         - containerPort: 80
 ---
