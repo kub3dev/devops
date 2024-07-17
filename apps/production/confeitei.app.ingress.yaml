@@ -9,9 +9,6 @@ spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - "confeitei.app"
-    secretName: app-confeitei-crt
-  - hosts:
     - "api.confeitei.app"
     secretName: api-confeitei-crt
   rules:
@@ -23,15 +20,5 @@ spec:
         backend:
           service:
             name: confeitei-api-service
-            port: 
-              number: 80
-  - host: confeitei.app
-    http:
-      paths:
-      - pathType: Prefix
-        path: "/"
-        backend:
-          service:
-            name: confeitei-app-service
             port: 
               number: 80
